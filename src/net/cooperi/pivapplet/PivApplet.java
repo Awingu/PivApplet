@@ -88,16 +88,17 @@ public class PivApplet extends Applet implements ExtendedLength
 	private static final byte INS_GET_RESPONSE = (byte)0xC0;
 
 	/* YubicoPIV extensions we support. */
-//	private static final byte INS_SET_MGMT = (byte)0xff;
-//	private static final byte INS_IMPORT_ASYM = (byte)0xfe;
-//	private static final byte INS_GET_VER = (byte)0xfd;
-//	private static final byte INS_RESET = (byte)0xfb;
-//	private static final byte INS_SET_PIN_RETRIES = (byte)0xfa;
-//	private static final byte INS_ATTEST = (byte)0xf9;
-//	private static final byte INS_GET_SERIAL = (byte)0xf8;
+	private static final byte INS_SET_MGMT = (byte)0xff;
+	private static final byte INS_IMPORT_ASYM = (byte)0xfe;
+	private static final byte INS_GET_VER = (byte)0xfd;
+	private static final byte INS_RESET = (byte)0xfb;
+	private static final byte INS_SET_PIN_RETRIES = (byte)0xfa;
+	private static final byte INS_ATTEST = (byte)0xf9;
+	private static final byte INS_GET_SERIAL = (byte)0xf8;
 
 	/* Our own private extensions. */
 	private static final byte INS_SG_DEBUG = (byte)0xe0;
+    private static final byte INS_SG_TOGGLE_YUBICO = (byte)0xe1;
 
 	/* ASSERT: tag.end() was called but tag has bytes left. */
 	protected static final short SW_TAG_END_ASSERT = (short)0x6F60;
@@ -369,6 +370,8 @@ public class PivApplet extends Applet implements ExtendedLength
 		initAttestation();
 	}
 
+	private boolean isYubico = true;
+
 	public void
 	process(APDU apdu)
 	{
@@ -420,33 +423,44 @@ public class PivApplet extends Applet implements ExtendedLength
 		case INS_RESET_PIN:
 			processResetPin(apdu);
 			break;
-//		case INS_SET_PIN_RETRIES:
-//			processSetPinRetries(apdu);
-//			break;
-//		case INS_RESET:
-//			processReset(apdu);
-//			break;
-//		case INS_GET_VER:
-//			processGetVersion(apdu);
-//			break;
-//		case INS_IMPORT_ASYM:
-//			processImportAsym(apdu);
-//			break;
-//		case INS_SET_MGMT:
-//			processSetMgmtKey(apdu);
-//			break;
+		case INS_SET_PIN_RETRIES:
+		    if(!isYubico) ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+			processSetPinRetries(apdu);
+			break;
+		case INS_RESET:
+            if(!isYubico) ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+			processReset(apdu);
+			break;
+		case INS_GET_VER:
+            if(!isYubico) ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+			processGetVersion(apdu);
+			break;
+		case INS_IMPORT_ASYM:
+            if(!isYubico) ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+			processImportAsym(apdu);
+			break;
+		case INS_SET_MGMT:
+            if(!isYubico) ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+			processSetMgmtKey(apdu);
+			break;
 		case INS_SG_DEBUG:
 			processSGDebug(apdu);
 			break;
 		case INS_GET_RESPONSE:
 			continueResponse(apdu);
 			break;
-//		case INS_ATTEST:
-//			processAttest(apdu);
-//			break;
-//		case INS_GET_SERIAL:
-//			processGetSerial(apdu);
-//			break;
+		case INS_ATTEST:
+            if(!isYubico) ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+			processAttest(apdu);
+			break;
+		case INS_GET_SERIAL:
+            if(!isYubico) ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+			processGetSerial(apdu);
+			break;
+        case INS_SG_TOGGLE_YUBICO:
+            isYubico = !isYubico;
+            processGetSerial(apdu);
+            break;
 		default:
 			ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
 		}
