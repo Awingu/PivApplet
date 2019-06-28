@@ -43,6 +43,9 @@ public class PivApplet extends Applet implements ExtendedLength
 	    (byte)0x00, (byte)0x00, (byte)0x10, (byte)0x00, (byte)0x01,
 	    (byte)0x00
 	};
+	private static final byte[] PIV_AID_SHORT = {
+			(byte)0xa0, (byte)0x00, (byte)0x00, (byte)0x03, (byte)0x08
+	};
 
 	private static final byte[] APP_NAME = {
 	    'P', 'i', 'v', 'A', 'p', 'p', 'l', 'e', 't'
@@ -364,7 +367,7 @@ public class PivApplet extends Applet implements ExtendedLength
 		ykFiles[TAG_YK_ATTEST] = new File();
 		slots[SLOT_F9].cert = ykFiles[TAG_YK_ATTEST];
 
-		initCARDCAP();
+//		initCARDCAP();
 		initCHUID();
 		initKEYHIST();
 		initAttestation();
@@ -613,42 +616,42 @@ public class PivApplet extends Applet implements ExtendedLength
 
 		wtlv.push((byte)0x79);
 		wtlv.push((byte)0x4F);
-		wtlv.write(PIV_AID, (short)0, (short)PIV_AID.length);
+		wtlv.write(PIV_AID_SHORT, (short)0, (short)PIV_AID_SHORT.length);
 		wtlv.pop();
 		wtlv.pop();
 
-		wtlv.push((byte)0x50);
-		wtlv.write(APP_NAME, (short)0, (short)APP_NAME.length);
-		wtlv.pop();
+//		wtlv.push((byte)0x50);
+//		wtlv.write(APP_NAME, (short)0, (short)APP_NAME.length);
+//		wtlv.pop();
 
-		wtlv.push((byte)0xAC);
-		wtlv.push((byte)0x80);
-		wtlv.writeByte(PIV_ALG_3DES);
-		wtlv.pop();
-		wtlv.push((byte)0x80);
-		wtlv.writeByte(PIV_ALG_RSA1024);
-		wtlv.pop();
-		wtlv.push((byte)0x80);
-		wtlv.writeByte(PIV_ALG_RSA2048);
-		wtlv.pop();
-		if (ecdsaP256Sha != null || ecdsaP256Sha256 != null) {
-			wtlv.push((byte)0x80);
-			wtlv.writeByte(PIV_ALG_ECCP256);
-			wtlv.pop();
-		}
-		if (ecdsaP256Sha != null) {
-			wtlv.push((byte)0x80);
-			wtlv.writeByte(PIV_ALG_ECCP256_SHA1);
-			wtlv.pop();
-		}
-		if (ecdsaP256Sha256 != null) {
-			wtlv.push((byte)0x80);
-			wtlv.writeByte(PIV_ALG_ECCP256_SHA256);
-			wtlv.pop();
-		}
-		wtlv.push((byte)0x06);
-		wtlv.pop();
-		wtlv.pop();
+//		wtlv.push((byte)0xAC);
+//		wtlv.push((byte)0x80);
+//		wtlv.writeByte(PIV_ALG_3DES);
+//		wtlv.pop();
+//		wtlv.push((byte)0x80);
+//		wtlv.writeByte(PIV_ALG_RSA1024);
+//		wtlv.pop();
+//		wtlv.push((byte)0x80);
+//		wtlv.writeByte(PIV_ALG_RSA2048);
+//		wtlv.pop();
+//		if (ecdsaP256Sha != null || ecdsaP256Sha256 != null) {
+//			wtlv.push((byte)0x80);
+//			wtlv.writeByte(PIV_ALG_ECCP256);
+//			wtlv.pop();
+//		}
+//		if (ecdsaP256Sha != null) {
+//			wtlv.push((byte)0x80);
+//			wtlv.writeByte(PIV_ALG_ECCP256_SHA1);
+//			wtlv.pop();
+//		}
+//		if (ecdsaP256Sha256 != null) {
+//			wtlv.push((byte)0x80);
+//			wtlv.writeByte(PIV_ALG_ECCP256_SHA256);
+//			wtlv.pop();
+//		}
+//		wtlv.push((byte)0x06);
+//		wtlv.pop();
+//		wtlv.pop();
 
 		wtlv.pop();
 		wtlv.end();
@@ -1931,7 +1934,7 @@ public class PivApplet extends Applet implements ExtendedLength
 		randData.generateData(serial, (short)0, (short)4);
 		serial[0] |= (byte)0x80;
 
-		initCARDCAP();
+		//initCARDCAP();
 		initCHUID();
 		initKEYHIST();
 		initAttestation();
@@ -2111,7 +2114,12 @@ public class PivApplet extends Applet implements ExtendedLength
 
 			if (file == null || file.data == null ||
 			    file.len == 0) {
-				ISOException.throwIt(ISO7816.SW_FILE_NOT_FOUND);
+				outgoing.reset();
+				wtlv.start(outgoing);
+				wtlv.push((byte)0x53, (short) 0);
+				wtlv.pop();
+				wtlv.end();
+				sendOutgoing(apdu);
 				return;
 			}
 
@@ -2250,7 +2258,7 @@ public class PivApplet extends Applet implements ExtendedLength
 
 		/* FASC-N identifier */
 		wtlv.push((byte)0x30);
-		wtlv.write(fascn, (short)0, (short)fascn.length);
+//		wtlv.write(fascn, (short)0, (short)fascn.length);
 		wtlv.pop();
 
 		/* Card GUID */
@@ -2258,9 +2266,9 @@ public class PivApplet extends Applet implements ExtendedLength
 		wtlv.write(guid, (short)0, (short)guid.length);
 		wtlv.pop();
 
-		/* Expiry date */
+//		/* Expiry date */
 		wtlv.push((byte)0x35);
-		wtlv.write(expiry, (short)0, (short)expiry.length);
+//		wtlv.write(expiry, (short)0, (short)expiry.length);
 		wtlv.pop();
 
 		/* Issuer signature */
